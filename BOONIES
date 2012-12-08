@@ -4,8 +4,8 @@
 #pragma config(Motor, port5, LLift2, tmotorServoContinuousRotation, openLoop) //Left Second Lift
 #pragma config(Motor, port6, RLift1, tmotorServoContinuousRotation, openLoop, reversed) //Right Bottom Lift
 #pragma config(Motor, port7, RLift2, tmotorServoContinuousRotation, openLoop, reversed) //Right Second Lift
-#pragma config(Motor, port8, FuBar1, tmotorServoContinuousRotation, openLoop) //Motor1
-#pragma config(Motor, port9, FuBar2, tmotorServoContinuousRotation, openLoop) //Motor2
+#pragma config(Motor, port8, Claw1, tmotorServoStandard, openLoop) //Claw Motor1
+#pragma config(Motor, port9, Claw2, tmotorServoStandard, openLoop, reversed) //Claw Motor2
 //Three-wire motors: tmotorVex393
 //Two-wire motors: tmotorServoContinuousRotation
 
@@ -46,37 +46,53 @@ void pre_auton()
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
+void stopWheels()
+{
+		motor[LWheel] = 0;
+		motor[RWheel] = 0;	
+}
+
+void moveForward()
+{
+		ClearTimer(T1);
+		while(time1[T1] < 1000) // 1 second: move forward
+		{
+				motor[RWheel] = 127;
+				motor[LWheel] = 127;
+		}
+		stopWheels();
+}
+
+void moveBackward()
+{
+		ClearTimer(T1);
+		while(time1[T1] < 1000) // 1 second: move backward
+		{
+				motor[RWheel] = -127;
+				motor[LWheel] = -127;
+		}
+}
+
 task autonomous()
 {
     // Insert user code here.
     // AutonomousCodePlaceholderForTesting();  // Remove this function call once you have "real" code.
 
-  	// wait1Msec("insert milliseconds"); // Waits for X Milliseconds
+		// wait1Msec("insert milliseconds"); // Waits for X Milliseconds
 		// random("insert maxvalue"); // Gets random number from 0 to X max
 
 		// wait1Msec(random(5000)); // Wait up to 5 seconds
 		// motor[RWheel] = random(127); // Chooses Random motor value between -127 and 127
 		// time1["timer name"] = milliseconds, time10["timer name"] = centiseconds, time100["timer name"] = centiseconds
 
+		////////////////////////////////
+		//START OF AUTONOMOUS
+		////////////////////////////////
+
 		wait1Msec(1000); // Wait 1 second before starting autonomous
-		//moveforward()
-		//{
-				ClearTimer(T1);
-				while(time1[T1] < 2000) // 2 seconds move forward
-				{
-						motor[RWheel] = 127;
-						motor[LWheel] = 127;
-				}
-		//}
-		//void movebackward()
-		//{
-				ClearTimer(T1);
-				while(time1[T1] < 2000) // 2 seconds move backward
-				{
-						motor[RWheel] = -127;
-						motor[LWheel] = -127;
-				}
-		//}
+		moveForward(); // 1 second forward
+		moveForward();
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -89,7 +105,7 @@ task autonomous()
 /////////////////////////////////////////////////////////////////////////////////////////
 
 int threshold = 8; // Threshold y-axis must pass to activate wheel motors. Default = 12.7
-int fubarlim = 120; // Threshold x-axis must pass to activate fubar motors.
+int clawlim = 120; // Threshold x-axis must pass to activate fubar motors.
 
 task usercontrol() // User control code here, inside the loop
 {
@@ -294,29 +310,33 @@ task usercontrol() // User control code here, inside the loop
         ////////////////////////////////
 
         ////////////////////////////////
-////////// FUBAR MOTOR 1
+////////// Claw Motor 1 + 2
         ////////////////////////////////
-        if (abs(vexRT[Ch1]) > fubarlim) // If the left joystick is greater than or less than the threshold:
+        if (abs(vexRT[Ch1]) > clawlim) // If the left joystick is greater than or less than the threshold:
         {
-            motor[FuBar1] = 127;
+            motor[Claw1] = (vexRT[Ch2]);
+            motor[Claw2] = (vexRT[Ch2]);
         }
-        if (abs(vexRT[Ch1]) < fubarlim) // If the left joystick is within the threshold:
+        if (abs(vexRT[Ch1]) < clawlim) // If the left joystick is within the threshold:
         {
-            motor[FuBar1] = 0; // Stop the left motor (cancel noise)
+            motor[Claw1] = 0; // Stop the left motor (cancel noise)
+            motor[Claw2] = 0; // Stop the left motor (cancel noise)
         }
         ////////////////////////////////
 
         ////////////////////////////////
-////////// FUBAR MOTOR 2
+////////// Claw Motor 1 + 2
         ////////////////////////////////
-        if (abs(vexRT[Ch4]) > fubarlim) // If the left joystick is greater than or less than the threshold:
+        /*if (abs(vexRT[Ch4]) > clawlim) // If the left joystick is greater than or less than the threshold:
         {
-            motor[FuBar2] = 127;
+            motor[Claw1] = (vexRT[Ch2]);
+            motor[Claw2] = (vexRT[Ch2]);
         }
-        if (abs(vexRT[Ch4]) < fubarlim) // If the left joystick is within the threshold:
+        if (abs(vexRT[Ch4]) < clawlim) // If the left joystick is within the threshold:
         {
-            motor[FuBar2] = 0; // Stop the left motor (cancel noise)
-        }
+            motor[Claw1] = 0; // Stop the left motor (cancel noise)
+            motor[Claw2] = 0; // Stop the left motor (cancel noise)
+        }*/
         ////////////////////////////////
     } // while (true)
 } // usercontrol()
